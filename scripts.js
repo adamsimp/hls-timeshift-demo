@@ -19,15 +19,70 @@ const player = videojs('video-player', {
     fluid: true,
     playbackRates: [0.5, 1, 1.5, 2],
     controls: true,
-    autoplay: false
+    autoplay: true,
+    liveui: false,  // Disable live UI features
+    liveTracker: {
+        trackingThreshold: 0,  // Don't auto-seek to live
+        liveTolerance: 15  // Reduce live tolerance
+    }
 });
 
 let currentProgram = null;
 let nowPlayingTimeout = null;
+let isLivePlayback = true;
 
 // Initialize UI elements
 const returnLiveButton = document.getElementById('return-live');
+const topHourButton = document.getElementById('top-hour');
 const liveIndicator = document.querySelector('.live-indicator');
+const timeFormatRadios = document.getElementsByName('timeFormat');
+
+function formatTimeParams(startTime, endTime, format = 'iso') {
+    if (format === 'iso') {
+        return {
+            start: startTime.toFormat("yyyy-MM-dd'T'HH:mm:ssZZ"),
+            end: endTime ? endTime.toFormat("yyyy-MM-dd'T'HH:mm:ssZZ") : null
+        };
+    } else {
+        return {
+            start: Math.floor(startTime.toSeconds()),
+            end: endTime ? Math.floor(endTime.toSeconds()) : null
+        };
+    }
+}
+
+function updateUrlDisplay(startTime, endTime) {
+    const urlDisplay = document.getElementById('current-params');
+    const format = Array.from(timeFormatRadios).find(radio => radio.checked).value;
+    
+    if (!startTime) {
+        urlDisplay.textContent = 'Live Stream';
+        return;
+    }
+    
+    const params = formatTimeParams(startTime, endTime, format);
+    const paramStrings = [];
+    
+    if (params.start) paramStrings.push(`start=${params.start}`);
+    if (params.end) paramStrings.push(`end=${params.end}`);
+    
+    urlDisplay.textContent = `?${paramStrings.join('&')}`;
+}
+
+function updatePlayerState(isLive) {
+    isLivePlayback = isLive;
+    if (isLive) {
+        liveIndicator.textContent = 'LIVE';
+        liveIndicator.style.background = 'rgba(255, 0, 0, 0.8)';
+        returnLiveButton.classList.remove('visible');
+        topHourButton.classList.add('visible');
+    } else {
+        liveIndicator.textContent = 'PRERECORDED';
+        liveIndicator.style.background = 'rgba(0, 70, 187, 0.8)';
+        returnLiveButton.classList.add('visible');
+        topHourButton.classList.remove('visible');
+    }
+}
 
 function showNowPlaying(title, startTime) {
     const nowPlaying = document.getElementById('now-playing');
@@ -55,19 +110,6 @@ function showNowPlaying(title, startTime) {
     }, 5000);
 }
 
-function updatePlayerState(isLive) {
-    if (isLive) {
-        liveIndicator.textContent = 'LIVE';
-        liveIndicator.style.background = 'rgba(255, 0, 0, 0.8)';
-        returnLiveButton.classList.remove('visible');
-    } else {
-        liveIndicator.textContent = 'PRERECORDED';
-        liveIndicator.style.background = 'rgba(0, 70, 187, 0.8)';
-        // Only show return to live button when in prerecorded mode
-        setTimeout(() => returnLiveButton.classList.add('visible'), 100);
-    }
-}
-
 function createProgramCard(title, startTime, endTime) {
     const card = document.createElement('div');
     card.className = 'program-card';
@@ -86,82 +128,54 @@ function createProgramCard(title, startTime, endTime) {
     `;
 
     card.onclick = () => {
-        const startISO = startTime.toISO({
-            includeOffset: true,
-            suppressMilliseconds: true
-        });
-        const endISO = endTime.toISO({
-            includeOffset: true,
-            suppressMilliseconds: true
-        });
-        
-        const url = new URL(player.src());
-        url.searchParams.set('start', startISO);
-        url.searchParams.set('end', endISO);
-        
-        // Update URL params display
-        const urlDisplay = document.getElementById('current-params');
-        const params = Array.from(url.searchParams.entries())
-            .map(([key, value]) => `${key}=${value}`)
-            .join('&');
-        urlDisplay.textContent = params ? `?${params}` : 'No parameters';
-        
-        // Update player state
-        updatePlayerState(false);
-
-        // Store current program info and show now playing
-        currentProgram = { title, startTime };
-        showNowPlaying(title, startTime);
-
-        player.src({
-            src: url.toString(),
-            type: 'application/x-mpegURL'
-        });
-        
-        player.play();
-        
-        // Scroll to player
-        document.querySelector('.video-container').scrollIntoView({
-            behavior: 'smooth'
-        });
+        playProgram(startTime, endTime, title);
     };
 
     return card;
 }
 
-// Return to live functionality
-returnLiveButton.addEventListener('click', () => {
+function playProgram(startTime, endTime, title) {
     const url = new URL(player.src());
-    url.searchParams.delete('start');
-    url.searchParams.delete('end');
+    const params = formatTimeParams(startTime, endTime, 
+        Array.from(timeFormatRadios).find(radio => radio.checked).value);
     
-    // Update URL display
-    const urlDisplay = document.getElementById('current-params');
-    urlDisplay.textContent = 'No parameters';
+    url.searchParams.set('start', params.start);
+    if (params.end) {
+        url.searchParams.set('end', params.end);
+    } else {
+        url.searchParams.delete('end');
+    }
     
-    // Update player state
-    updatePlayerState(true);
-    
+    updateUrlDisplay(startTime, endTime);
+    updatePlayerState(false);
+
+    currentProgram = { title, startTime };
+    showNowPlaying(title, startTime);
+
     player.src({
         src: url.toString(),
         type: 'application/x-mpegURL'
     });
     
     player.play();
-});
+    
+    document.querySelector('.video-container').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
 
-// Handle video player events
-player.on('play', () => {
-    if (currentProgram) {
-        showNowPlaying(currentProgram.title, currentProgram.startTime);
-    }
-});
-
-player.on('useractive', () => {
-    if (currentProgram) {
-        showNowPlaying(currentProgram.title, currentProgram.startTime);
-    }
-});
+function startAtTopOfHour() {
+    const now = DateTime.now().setZone('America/Chicago');
+    const topOfHour = now.startOf('hour');
+    
+    playProgram(topOfHour, null, 'Stream from Top of Hour');
+    
+    // Wait for the player to be ready with the new source
+    player.one('loadedmetadata', () => {
+        // Force playback from the beginning of the available segments
+        player.currentTime(0);
+    });
+}
 
 function createProgramCards() {
     const container = document.getElementById('programs-container');
@@ -211,10 +225,7 @@ function createProgramCards() {
 // Initialize URL params display
 const initialUrl = new URL(player.src());
 const urlDisplay = document.getElementById('current-params');
-const params = Array.from(initialUrl.searchParams.entries())
-    .map(([key, value]) => `${key}=${value}`)
-    .join('&');
-urlDisplay.textContent = params ? `?${params}` : 'No parameters';
+urlDisplay.textContent = 'Live Stream';
 
 // Initialize copy button functionality
 document.getElementById('copy-url').addEventListener('click', () => {
@@ -229,5 +240,48 @@ document.getElementById('copy-url').addEventListener('click', () => {
     });
 });
 
+// Update time format radio handlers
+timeFormatRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        if (currentProgram) {
+            updateUrlDisplay(currentProgram.startTime, currentProgram.endTime);
+        }
+    });
+});
+
+// Return to live functionality
+returnLiveButton.addEventListener('click', () => {
+    const url = new URL(player.src());
+    url.searchParams.delete('start');
+    url.searchParams.delete('end');
+    
+    updateUrlDisplay(null, null);
+    updatePlayerState(true);
+    
+    player.src({
+        src: url.toString(),
+        type: 'application/x-mpegURL'
+    });
+    
+    player.play();
+});
+
+// Top of hour functionality
+topHourButton.addEventListener('click', startAtTopOfHour);
+
+// Handle video player events
+player.on('play', () => {
+    if (currentProgram) {
+        showNowPlaying(currentProgram.title, currentProgram.startTime);
+    }
+});
+
+player.on('useractive', () => {
+    if (currentProgram) {
+        showNowPlaying(currentProgram.title, currentProgram.startTime);
+    }
+});
+
 // Initialize the page
 createProgramCards();
+updatePlayerState(true);

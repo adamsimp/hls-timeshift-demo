@@ -13,8 +13,16 @@
     <div class="container">
         <div class="url-display">
             <div class="url-box">
-                <span class="url-label">Query Parameters:</span>
-                <code id="current-params"></code>
+                <span class="url-label">Stream Status:</span>
+                <code id="current-params">Live Stream</code>
+                <div class="format-toggle">
+                    <label>
+                        <input type="radio" name="timeFormat" value="iso" checked> ISO 8601
+                    </label>
+                    <label>
+                        <input type="radio" name="timeFormat" value="posix"> POSIX
+                    </label>
+                </div>
                 <button id="copy-url" class="copy-button">
                     <span class="copy-icon">📋</span>
                     Copy Full URL
@@ -24,9 +32,10 @@
         <div class="video-container">
             <div class="player-controls">
                 <div class="live-indicator">LIVE</div>
+                <button id="top-hour" class="control-button">Start at Top of Hour</button>
                 <button id="return-live" class="return-live-button">Return to Live</button>
             </div>
-            <video id="video-player" class="video-js vjs-default-skin" controls>
+            <video id="video-player" class="video-js vjs-default-skin" controls autoplay>
                 <source type="application/x-mpegURL" src="https://as.gmg.io/out/v1/kprc/primary-control-plus/v1/index.m3u8">
             </video>
             <div id="now-playing" class="now-playing">
