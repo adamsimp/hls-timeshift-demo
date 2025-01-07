@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPRC Live Player</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="url-display">
+            <div class="url-box">
+                <span class="url-label">Query Parameters:</span>
+                <code id="current-params"></code>
+                <button id="copy-url" class="copy-button">
+                    <span class="copy-icon">📋</span>
+                    Copy Full URL
+                </button>
+            </div>
+        </div>
+        <div class="video-container">
+            <div class="player-controls">
+                <div class="live-indicator">LIVE</div>
+                <button id="return-live" class="return-live-button">Return to Live</button>
+            </div>
+            <video id="video-player" class="video-js vjs-default-skin" controls>
+                <source type="application/x-mpegURL" src="https://as.gmg.io/out/v1/kprc/primary-control-plus/v1/index.m3u8">
+            </video>
+            <div id="now-playing" class="now-playing">
+                <div class="now-playing-content">
+                    <div class="now-playing-title"></div>
+                    <div class="now-playing-time"></div>
+                </div>
+            </div>
+        </div>
+        <div class="programs-grid" id="programs-container"></div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>

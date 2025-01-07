@@ -1,0 +1,211 @@
+:root {
+    --kprc-blue: #0047BB;
+    --dark-bg: #121212;
+    --card-bg: #1E1E1E;
+    --text: #FFFFFF;
+    --text-secondary: #A0A0A0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--dark-bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.url-display {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: 8px;
+}
+
+.url-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 8px;
+    background: var(--dark-bg);
+    border-radius: 4px;
+}
+
+.url-label {
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+code {
+    flex: 1;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 13px;
+    color: var(--kprc-blue);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.copy-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--kprc-blue);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.copy-button:hover {
+    background-color: #0055d4;
+}
+
+.copy-icon {
+    font-size: 14px;
+}
+
+.video-container {
+    width: 100%;
+    margin-bottom: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.video-js {
+    width: 100%;
+    aspect-ratio: 16/9;
+}
+
+.now-playing {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    max-width: 400px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.video-container:hover .now-playing,
+.now-playing.visible {
+    opacity: 1;
+}
+
+.now-playing-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.now-playing-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.now-playing-time {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 20px 0;
+}
+
+.program-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.program-card:hover {
+    transform: translateY(-2px);
+    background-color: #252525;
+}
+
+.program-time {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 8px;
+}
+
+.program-title {
+    color: var(--text);
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.player-controls {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    z-index: 2;
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.return-live-button {
+    display: none;  /* Hidden by default */
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.return-live-button.visible {
+    display: flex;
+}
+
+.return-live-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+}
