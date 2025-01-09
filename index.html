@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KPRC Live Player</title>
+    <title>Livestream Timeshift Demo</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
@@ -33,7 +33,7 @@
             <div class="player-controls">
                 <div class="live-indicator">LIVE</div>
                 <button id="top-hour" class="control-button">Start at Top of Hour</button>
-                <button id="return-live" class="return-live-button">Return to Live</button>
+                <button id="return-live" class="control-button">Return to Live</button>
             </div>
             <video id="video-player" class="video-js vjs-default-skin" controls autoplay>
                 <source type="application/x-mpegURL" src="https://as.gmg.io/out/v1/kprc/primary-control-plus/v1/index.m3u8">
@@ -48,5 +48,6 @@
         <div class="programs-grid" id="programs-container"></div>
     </div>
     <script src="scripts.js"></script>
+    <script type="module" src="markdown-loader.js"></script>
 </body>
 </html>

@@ -1,24 +1,23 @@
 const DateTime = luxon.DateTime;
 
-// News programming schedule (24-hour format)
 const weekdayPrograms = [
-    { time: '05:00', duration: 30, title: 'KPRC 2 News Today at 5:00am' },
-    { time: '05:30', duration: 30, title: 'KPRC 2 News Today at 5:30am' },
-    { time: '06:00', duration: 60, title: 'KPRC 2 News Today at 6:00am' },
-    { time: '12:00', duration: 60, title: 'KPRC 2 News Today at Noon' },
+    { time: '05:00', duration: 30, title: 'KPRC 2 News - 5:00am' },
+    { time: '05:30', duration: 30, title: 'KPRC 2 News - 5:30am' },
+    { time: '06:00', duration: 60, title: 'KPRC 2 News - 6:00am' },
+    { time: '12:00', duration: 60, title: 'KPRC 2 News - Noon' },
     { time: '13:00', duration: 60, title: 'Houston Life' },
-    { time: '15:00', duration: 30, title: 'KPRC 2 News Today at 3:00pm' },
-    { time: '16:00', duration: 60, title: 'KPRC 2 News Today at 4:00pm' },
-    { time: '17:00', duration: 30, title: 'KPRC 2 News Today at 5:00pm' },
-    { time: '18:00', duration: 30, title: 'KPRC 2 News Today at 6:00pm' },
-    { time: '22:00', duration: 35, title: 'KPRC 2 News Today at 10:00pm' }
+    { time: '15:00', duration: 30, title: 'KPRC 2 News - 3:00pm' },
+    { time: '16:00', duration: 60, title: 'KPRC 2 News - 4:00pm' },
+    { time: '17:00', duration: 30, title: 'KPRC 2 News - 5:00pm' },
+    { time: '18:00', duration: 30, title: 'KPRC 2 News - 6:00pm' },
+    { time: '22:00', duration: 35, title: 'KPRC 2 News - 10:00pm' }
 ];
 
 // Initialize video player
 const player = videojs('video-player', {
     fluid: true,
-    playbackRates: [0.5, 1, 1.5, 2],
     controls: true,
+    muted: true,
     autoplay: true,
     liveui: false,  // Disable live UI features
     liveTracker: {
@@ -45,20 +44,24 @@ function formatTimeParams(startTime, endTime, format = 'iso') {
         };
     } else {
         return {
-            start: Math.floor(startTime.toSeconds()),
-            end: endTime ? Math.floor(endTime.toSeconds()) : null
+            start: Math.floor(startTime.toUTC().toSeconds()),
+            end: endTime ? Math.floor(endTime.toUTC().toSeconds()) : null
         };
     }
 }
 
 function updateUrlDisplay(startTime, endTime) {
     const urlDisplay = document.getElementById('current-params');
+    const urlLabel = document.querySelector('.url-label');
     const format = Array.from(timeFormatRadios).find(radio => radio.checked).value;
     
     if (!startTime) {
         urlDisplay.textContent = 'Live Stream';
+        urlLabel.textContent = 'Stream Status:';
         return;
     }
+    
+    urlLabel.textContent = 'Time Parameters:';
     
     const params = formatTimeParams(startTime, endTime, format);
     const paramStrings = [];
@@ -67,6 +70,34 @@ function updateUrlDisplay(startTime, endTime) {
     if (params.end) paramStrings.push(`end=${params.end}`);
     
     urlDisplay.textContent = `?${paramStrings.join('&')}`;
+}
+
+function initializeParametersCopy() {
+    const urlDisplay = document.getElementById('current-params');
+    
+    urlDisplay.title = 'Click to copy parameters';
+    
+    urlDisplay.addEventListener('click', () => {
+        if (!urlDisplay.classList.contains('live-stream')) {
+            const originalText = urlDisplay.textContent;
+            
+            navigator.clipboard.writeText(originalText).then(() => {
+                urlDisplay.classList.add('copied');
+                urlDisplay.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    urlDisplay.classList.remove('copied');
+                    urlDisplay.textContent = originalText;
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                urlDisplay.textContent = 'Copy failed';
+                setTimeout(() => {
+                    urlDisplay.textContent = originalText;
+                }, 1500);
+            });
+        }
+    });
 }
 
 function updatePlayerState(isLive) {
@@ -110,30 +141,6 @@ function showNowPlaying(title, startTime) {
     }, 5000);
 }
 
-function createProgramCard(title, startTime, endTime) {
-    const card = document.createElement('div');
-    card.className = 'program-card';
-    
-    const timeStr = startTime.toLocaleString({
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        month: 'short',
-        day: 'numeric'
-    });
-
-    card.innerHTML = `
-        <div class="program-time">${timeStr}</div>
-        <div class="program-title">${title}</div>
-    `;
-
-    card.onclick = () => {
-        playProgram(startTime, endTime, title);
-    };
-
-    return card;
-}
-
 function playProgram(startTime, endTime, title) {
     const url = new URL(player.src());
     const params = formatTimeParams(startTime, endTime, 
@@ -149,7 +156,11 @@ function playProgram(startTime, endTime, title) {
     updateUrlDisplay(startTime, endTime);
     updatePlayerState(false);
 
-    currentProgram = { title, startTime };
+    currentProgram = { 
+        title, 
+        startTime,
+        duration: endTime ? endTime.diff(startTime, 'minutes').minutes : null
+    };
     showNowPlaying(title, startTime);
 
     player.src({
@@ -215,6 +226,41 @@ function createProgramCards() {
     // Clear existing programs
     container.innerHTML = '';
     
+    function createProgramCard(title, startTime, endTime) {
+        const card = document.createElement('div');
+        card.className = 'program-card';
+        
+        // Get relative day description
+        const diffInDays = Math.floor(now.diff(startTime, 'days').days);
+        
+        let dayLabel;
+        if (diffInDays === 0) {
+            dayLabel = 'Today';
+        } else if (diffInDays === 1) {
+            dayLabel = 'Yesterday';
+        } else {
+            dayLabel = '2 Days Ago';
+        }
+        
+        const timeStr = startTime.toLocaleString({
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        card.innerHTML = `
+            <div class="program-day">${dayLabel}</div>
+            <div class="program-time">${timeStr}</div>
+            <div class="program-title">${title}</div>
+        `;
+
+        card.onclick = () => {
+            playProgram(startTime, endTime, title);
+        };
+
+        return card;
+    }
+    
     // Create cards
     allPrograms.forEach(program => {
         const card = createProgramCard(program.title, program.start, program.end);
@@ -230,7 +276,26 @@ urlDisplay.textContent = 'Live Stream';
 // Initialize copy button functionality
 document.getElementById('copy-url').addEventListener('click', () => {
     const url = new URL(player.src());
-    navigator.clipboard.writeText(url.toString()).then(() => {
+    const format = Array.from(timeFormatRadios).find(radio => radio.checked).value;
+    
+    // If we have a current program, ensure we use the correct format
+    if (currentProgram) {
+        const params = formatTimeParams(currentProgram.startTime, currentProgram.endTime, format);
+        url.searchParams.delete('start');
+        url.searchParams.delete('end');
+        
+        if (params.start) url.searchParams.append('start', params.start);
+        if (params.end) url.searchParams.append('end', params.end);
+    }
+    
+    // Create raw URL string without encoding time parameters
+    let urlString = url.origin + url.pathname;
+    const searchParams = url.searchParams.toString();
+    if (searchParams) {
+        urlString += '?' + decodeURIComponent(searchParams);
+    }
+    
+    navigator.clipboard.writeText(urlString).then(() => {
         const button = document.getElementById('copy-url');
         const originalText = button.innerHTML;
         button.innerHTML = '<span class="copy-icon">✓</span>Copied!';
@@ -244,7 +309,8 @@ document.getElementById('copy-url').addEventListener('click', () => {
 timeFormatRadios.forEach(radio => {
     radio.addEventListener('change', () => {
         if (currentProgram) {
-            updateUrlDisplay(currentProgram.startTime, currentProgram.endTime);
+            const endTime = currentProgram.startTime.plus({ minutes: currentProgram.duration });
+            updateUrlDisplay(currentProgram.startTime, endTime);
         }
     });
 });
@@ -283,5 +349,8 @@ player.on('useractive', () => {
 });
 
 // Initialize the page
-createProgramCards();
-updatePlayerState(true);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeParametersCopy();
+    createProgramCards();
+    updatePlayerState(true);
+});

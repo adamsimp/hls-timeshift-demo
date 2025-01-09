@@ -42,15 +42,6 @@ body {
     color: var(--text-secondary);
 }
 
-code {
-    flex: 1;
-    font-family: 'Monaco', 'Consolas', monospace;
-    font-size: 13px;
-    color: var(--kprc-blue);
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
 .copy-button {
     display: flex;
     align-items: center;
@@ -143,6 +134,15 @@ code {
     background-color: #252525;
 }
 
+.program-day {
+    color: var(--kprc-blue);
+    font-size: 0.8em;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
 .program-time {
     color: var(--text-secondary);
     font-size: 0.9em;
@@ -179,7 +179,7 @@ code {
 }
 
 .return-live-button {
-    display: none;  /* Hidden by default */
+    display: none;
     align-items: center;
     background: rgba(255, 255, 255, 0.15);
     color: white;
@@ -199,14 +199,6 @@ code {
 .return-live-button:hover {
     background: rgba(255, 255, 255, 0.25);
     border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 0, 0, 0.8);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 1em;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    z-index: 1;
 }
 
 .format-toggle {
@@ -229,28 +221,10 @@ code {
     margin: 0;
 }
 
-.top-hour-button {
-    display: block;
-    width: 100%;
-    margin-top: 8px;
-    padding: 8px;
-    background: var(--kprc-blue);
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-}
-
-.top-hour-button:hover {
-    background-color: #0055d4;
-}
-
 .control-button {
-    display: none;  /* Hidden by default */
+    display: none;
     align-items: center;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.5);
     color: white;
     padding: 8px 16px;
     border-radius: 6px;
@@ -259,6 +233,8 @@ code {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .control-button.visible {
@@ -266,6 +242,271 @@ code {
 }
 
 .control-button:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 171, 85, 0.5);
     border-color: rgba(255, 255, 255, 0.5);
+}
+
+.markdown-container {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 24px;
+    line-height: 1.6;
+}
+
+.markdown-container h1,
+.markdown-container h2,
+.markdown-container h3 {
+    color: var(--text);
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+.markdown-container h1:first-child {
+    margin-top: 0;
+}
+
+.markdown-container p {
+    margin-bottom: 1em;
+    color: var(--text-secondary);
+}
+
+.markdown-container ul,
+.markdown-container ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+    color: var(--text-secondary);
+}
+
+.markdown-container a {
+    color: var(--kprc-blue);
+    text-decoration: none;
+}
+
+.markdown-container a:hover {
+    text-decoration: underline;
+}
+
+#current-params {
+    cursor: default;
+    transition: background-color 0.2s;
+}
+
+#current-params:not(.live-stream) {
+    cursor: pointer;
+}
+
+#current-params:not(.live-stream):hover {
+    background: rgba(0, 71, 187, 0.1);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+}
+
+#current-params:not(.live-stream):active {
+    background: rgba(0, 71, 187, 0.2);
+}
+
+#current-params.copied {
+    color: #00AB55;
+    transition: color 0.2s;
+}
+
+/* CODE-RELATED STYLES START HERE */
+
+/* Base code styles */
+code {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9em;
+}
+
+/* URL box code */
+.url-box code {
+    flex: 1;
+    font-size: 13px;
+    color: var(--kprc-blue);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/* Inline code (single backtick) */
+.markdown-container :not(pre) > code {
+    background: var(--dark-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    color: var(--kprc-blue);
+}
+
+/* Code block container (triple backtick) */
+.markdown-container pre {
+    background: var(--dark-bg);
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+/* Code inside code blocks */
+.markdown-container pre > code {
+    color: var(--kprc-blue);
+    padding: 0;
+    background: none;
+}
+
+/* Code block styles */
+.markdown-container pre {
+    background: var(--dark-bg);
+    padding: 1em;
+    border-radius: 6px;
+    margin: 1em 0;
+    overflow-x: auto;
+}
+
+.markdown-container pre code {
+    color: var(--kprc-blue);
+    padding: 0;
+    background: none;
+    display: block;
+}
+
+/* DateTime URL specific styles - for both block and inline */
+.language-datetime-url .url-param,
+.inline-url-params .url-param {
+    color: var(--kprc-blue);
+}
+
+.language-datetime-url .url-date,
+.inline-url-params .url-date {
+    color: #50FA7B;
+}
+
+.language-datetime-url .url-time,
+.inline-url-params .url-time {
+    color: #8BE9FD;
+}
+
+.language-datetime-url .url-timezone,
+.inline-url-params .url-timezone {
+    color: #FFB86C;
+}
+
+.language-datetime-url .url-posix,
+.inline-url-params .url-posix {
+    color: #BD93F9;
+}
+
+/* Special styling for inline URL parameters */
+.inline-url-params {
+    background: var(--dark-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+/* GitHub-style alerts */
+.markdown-container .github-alert {
+    padding: 16px;
+    margin: 16px 0;
+    border-left: 4px solid;
+    border-radius: 6px;
+    background-color: var(--dark-bg);
+}
+
+.markdown-container .github-alert-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.markdown-container .github-alert-icon::before {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+}
+
+/* Note style */
+.markdown-container .github-alert-note {
+    border-color: var(--kprc-blue);
+    background-color: rgba(0, 71, 187, 0.1);
+}
+
+.markdown-container .github-alert-note .github-alert-title {
+    color: var(--kprc-blue);
+}
+
+.markdown-container .github-alert-note .github-alert-icon::before {
+    content: "ℹ";
+}
+
+/* Tip style */
+.markdown-container .github-alert-tip {
+    border-color: #10B981;
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.markdown-container .github-alert-tip .github-alert-title {
+    color: #10B981;
+}
+
+.markdown-container .github-alert-tip .github-alert-icon::before {
+    content: "💡";
+}
+
+/* Important style */
+.markdown-container .github-alert-important {
+    border-color: #6366F1;
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+.markdown-container .github-alert-important .github-alert-title {
+    color: #6366F1;
+}
+
+.markdown-container .github-alert-important .github-alert-icon::before {
+    content: "❗";
+}
+
+/* Warning style */
+.markdown-container .github-alert-warning {
+    border-color: #F59E0B;
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.markdown-container .github-alert-warning .github-alert-title {
+    color: #F59E0B;
+}
+
+.markdown-container .github-alert-warning .github-alert-icon::before {
+    content: "⚠";
+}
+
+/* Caution style */
+.markdown-container .github-alert-caution {
+    border-color: #EF4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.markdown-container .github-alert-caution .github-alert-title {
+    color: #EF4444;
+}
+
+.markdown-container .github-alert-caution .github-alert-icon::before {
+    content: "🚫";
+}
+
+/* Alert content styling */
+.markdown-container .github-alert-content {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.markdown-container .github-alert-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .markdown-container .github-alert {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
 }
