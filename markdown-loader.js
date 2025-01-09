@@ -126,7 +126,7 @@ marked.parse = function(markdown, options) {
 
 async function loadMarkdownContent() {
     try {
-        const response = await fetch('content.md');
+        const response = await fetch('README.md');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const text = await response.text();
